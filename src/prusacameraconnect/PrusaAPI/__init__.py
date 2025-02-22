@@ -1,5 +1,9 @@
+import base64
 import hashlib
+import ssl
+
 import aiohttp
+import certifi
 import structlog
 
 from Types import PrinterState
@@ -21,10 +25,12 @@ class PrusaConnectAPI:
         async with self._session as session:
             async with session.put(
                 "/c/snapshot",
-                headers={"Token": token, "Fingerprint": fingerprint},
+                headers={"Token": token,
+                         "Fingerprint": base64.b64encode(fingerprint.encode('utf-8')).decode('utf-8')},
                 data=snapshot,
+                ssl=ssl.create_default_context(cafile=certifi.where())
             ) as resp:
-                if resp.status != 204:
+                if 200 < resp.status >= 300:
                     raise Exception(f"Failed to upload snapshot: {resp.status} {resp.reason}")
                 await log.adebug("Uploaded snapshot", fingerprint=fingerprint)
 
