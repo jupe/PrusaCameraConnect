@@ -10,6 +10,7 @@ dependencies = [
     "rich>=13.7.0",
     "strictyaml>=1.7.3",
     "opencv-python>=4.9.0.80",
+    "certifi==2025.1.31"
 ]
 requires-python = "==3.11.*"
 readme = "README.md"
