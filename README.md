@@ -51,6 +51,11 @@ Option | Required? | Description
 -------|-----------|------------
 `url`  |    Yes    | URL of the video stream. E.G. `rtsp://0.0.0.0:8445/printer`
 
+### Print timelapse (optional sidecar)
+PrusaCameraConnect doesn't store any frames. If you want a debug timelapse video of every print
+(with a timestamp / state / progress / Z overlay), run the separate sidecar in [`timelapse/`](timelapse/README.md)
+next to it. It reads the same camera source and is published as `ghcr.io/<owner>/prusacameraconnect-timelapse`.
+
 ## Deployment
 
 This server is a simple python application that uses PDM to manage dependencies. A Docker image has been provided for some user's convenience.
