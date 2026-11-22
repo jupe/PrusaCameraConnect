@@ -8,5 +8,9 @@ services:
     env_file: .env
     environment:
       TZ: ${TZ:-Europe/Helsinki}
+      HTTP_PORT: ${HTTP_PORT:-8099}
+    ports:
+      # history.json + videos/thumbnails, e.g. for a Home Assistant dashboard
+      - "${HTTP_PORT:-8099}:${HTTP_PORT:-8099}"
     volumes:
       - ./timelapses:/data

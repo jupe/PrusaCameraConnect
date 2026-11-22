@@ -9,7 +9,10 @@ For every print it:
 1. polls PrusaLink `GET /api/v1/status` every `INTERVAL` seconds (digest auth),
 2. grabs a camera frame (RTSP via ffmpeg, or an HTTP snapshot URL),
 3. burns an overlay into the frame: time, state, progress, Z height, nozzle/bed temps, frame #, job name,
-4. when the print ends, encodes `/data/<YYYYmmdd-HHMMSS>_<jobname>_<FINAL_STATE>.mp4` (H.264).
+4. when the print ends, encodes `/data/<YYYYmmdd-HHMMSS>_<jobname>_<FINAL_STATE>.mp4` (H.264),
+   saves the last frame as `<...>_<FINAL_STATE>.jpg` + a 480 px `<...>_thumb.jpg`, and prepends the
+   print to `/data/history.json`,
+5. serves `/data` read-only over HTTP (default port 8099), e.g. for a Home Assistant dashboard.
 
 Useful for debugging parts that break loose from the bed mid-print.
 
@@ -43,8 +46,40 @@ docker compose logs -f print-timelapse
 | `CRF` | `28` | higher = smaller file |
 | `OUTPUT_DIR` | `/data` | |
 | `KEEP_FRAMES` | `false` | keep jpgs after encoding |
-| `RETENTION_DAYS` | `0` | delete videos older than N days after each encode; `0` = keep forever |
+| `RETENTION_DAYS` | `0` | after each print, delete mp4/jpg files older than N days and drop their history entries; `0` = keep forever |
+| `HISTORY_MAX` | `50` | max entries kept in `history.json` |
+| `HTTP_PORT` | `8099` | read-only HTTP server port; `0` disables it |
 | `TZ` | `Europe/Helsinki` | timezone for the overlay and file names |
+
+## Print history over HTTP
+
+`http://<host>:8099/history.json` (served with `Cache-Control: no-cache`, newest first):
+
+```json
+{
+  "count": 1,
+  "prints": [
+    {
+      "name": "benchy_0.2mm_PLA_MK4S_45m",
+      "state": "FINISHED",
+      "start": "2026-11-22T10:07:35+02:00",
+      "end": "2026-11-22T10:33:13+02:00",
+      "duration_min": 26,
+      "frames": 312,
+      "video": "20261122-100735_benchy_0.2mm_PLA_MK4S_45m_FINISHED.mp4",
+      "image": "20261122-100735_benchy_0.2mm_PLA_MK4S_45m_FINISHED.jpg",
+      "thumb": "20261122-100735_benchy_0.2mm_PLA_MK4S_45m_FINISHED_thumb.jpg"
+    }
+  ]
+}
+```
+
+File names are relative to the server root: `http://<host>:8099/<video>`. `video` is `null` when the
+print had fewer than 2 frames, or when encoding failed (the frames are kept then).
+Videos support HTTP Range requests, so they play in Safari / the iOS Home Assistant app.
+The in-progress `frames/` folder is not served (404).
+
+There is no authentication: only expose the port on your LAN.
 
 ## Verifying on your setup
 
