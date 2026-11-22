@@ -4,6 +4,17 @@ from PrusaAPI import PrusaConnectAPI, PrusaLinkAPI
 from Config import Config, Camera
 from Camera import SourceOfflineException
 
+# Rich tracebacks show local variables by default, which leaks camera tokens and
+# printer passwords into the logs. Keep the pretty tracebacks, drop the locals.
+structlog.configure(
+    processors=[
+        *structlog.get_config()["processors"][:-1],
+        structlog.dev.ConsoleRenderer(
+            exception_formatter=structlog.dev.RichTracebackFormatter(show_locals=False)
+        ),
+    ]
+)
+
 log = structlog.get_logger()
 config = Config()
 api = PrusaConnectAPI()

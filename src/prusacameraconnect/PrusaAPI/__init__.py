@@ -25,14 +25,16 @@ class PrusaConnectAPI:
         async with self._session as session:
             async with session.put(
                 "/c/snapshot",
+                # Prusa Connect rejects snapshots without an image content type (415)
                 headers={"Token": token,
-                         "Fingerprint": base64.b64encode(fingerprint.encode('utf-8')).decode('utf-8')},
+                         "Fingerprint": base64.b64encode(fingerprint.encode('utf-8')).decode('utf-8'),
+                         "Content-Type": "image/jpg"},
                 data=snapshot,
                 ssl=ssl.create_default_context(cafile=certifi.where())
             ) as resp:
                 if 200 < resp.status >= 300:
                     raise Exception(f"Failed to upload snapshot: {resp.status} {resp.reason}")
-                await log.adebug("Uploaded snapshot", fingerprint=fingerprint)
+                await log.adebug("Uploaded snapshot")
 
 
 class PrusaLinkAPI:
