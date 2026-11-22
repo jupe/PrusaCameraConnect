@@ -165,3 +165,7 @@ cython_debug/
 src/prusacameraconnect/config.yaml
 
 *.bak
+
+# timelapse sidecar: site-specific config and output
+timelapse/.env
+timelapse/timelapses/
