@@ -165,7 +165,7 @@ def main():
                         f"Z={num(printer.get('axis_z'), '.2f')}  "
                         f"N={num(printer.get('temp_nozzle'), '.0f')}C "
                         f"B={num(printer.get('temp_bed'), '.0f')}C  "
-                        f"#{session['n'] + 1}  {session['name']}")
+                        f"#{session['n'] + 1}\n{session['name']}")
                 img = overlay(grab_frame(), text)
                 # only advance the counter after a successful grab: ffmpeg's
                 # image2 demuxer stops at the first gap in the sequence
